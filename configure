@@ -505,6 +505,7 @@ debug_mutex="no"
 libpmem=""
 default_devices="yes"
 plugins="no"
+rng_none="no"
 
 supported_cpu="no"
 supported_os="no"
@@ -1542,6 +1543,10 @@ for opt do
   ;;
   --disable-plugins) plugins="no"
   ;;
+  --enable-rng-none) rng_none=yes
+  ;;
+  --disable-rng-none) rng_none=no
+  ;;
   *)
       echo "ERROR: unknown option $opt"
       echo "Try '$0 --help' for more information"
@@ -1829,6 +1834,7 @@ disabled with --disable-FEATURE, default is enabled if available:
   debug-mutex     mutex debugging support
   libpmem         libpmem support
   xkbcommon       xkbcommon support
+  rng-none        dummy RNG, avoid using /dev/(u)random and getrandom()
 
 NOTE: The object files are built at the place where configure is launched
 EOF
@@ -6604,6 +6610,7 @@ echo "libpmem support   $libpmem"
 echo "libudev           $libudev"
 echo "default devices   $default_devices"
 echo "plugin support    $plugins"
+echo "rng-none          $rng_none"
 
 if test "$supported_cpu" = "no"; then
     echo
@@ -7551,6 +7558,10 @@ fi
 
 if test "$edk2_blobs" = "yes" ; then
   echo "DECOMPRESS_EDK2_BLOBS=y" >> $config_host_mak
+fi
+
+if test "$rng_none" = "yes"; then
+  echo "CONFIG_RNG_NONE=y" >> $config_host_mak
 fi
 
 # use included Linux headers
