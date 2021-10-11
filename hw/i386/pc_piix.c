@@ -186,6 +186,15 @@ static void pc_init1(MachineState *machine,
     } else if (machine->kernel_filename != NULL) {
         /* For xen HVM direct kernel boot, load linux here */
         xen_load_linux(pcms);
+    } else {
+        pcmc->has_acpi_build = false;
+
+        FWCfgState *fw_cfg;
+
+        fw_cfg = fw_cfg_init_io(FW_CFG_IO_BASE);
+        rom_set_fw(fw_cfg);
+
+        x86ms->fw_cfg = fw_cfg;
     }
 
     gsi_state = pc_gsi_create(&x86ms->gsi, pcmc->pci_enabled);
