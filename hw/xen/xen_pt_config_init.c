@@ -1454,6 +1454,7 @@ static XenPTRegInfo xen_pt_emu_reg_msi[] = {
 };
 
 
+#ifndef CONFIG_STUBDOM
 /**************************************
  * MSI-X Capability
  */
@@ -1548,6 +1549,7 @@ static XenPTRegInfo xen_pt_emu_reg_msix[] = {
         .size = 0,
     },
 };
+#endif
 
 static XenPTRegInfo xen_pt_emu_reg_igd_opregion[] = {
     /* Intel IGFX OpRegion reg */
@@ -1684,6 +1686,7 @@ static int xen_pt_msi_size_init(XenPCIPassthroughState *s,
     *size = msi_size;
     return 0;
 }
+#ifndef CONFIG_STUBDOM
 /* get MSI-X Capability Structure register group size */
 static int xen_pt_msix_size_init(XenPCIPassthroughState *s,
                                  const XenPTRegGroupInfo *grp_reg,
@@ -1701,6 +1704,7 @@ static int xen_pt_msix_size_init(XenPCIPassthroughState *s,
     *size = grp_reg->grp_size;
     return 0;
 }
+#endif
 
 
 static const XenPTRegGroupInfo xen_pt_emu_reg_grps[] = {
@@ -1794,6 +1798,7 @@ static const XenPTRegGroupInfo xen_pt_emu_reg_grps[] = {
         .size_init   = xen_pt_pcie_size_init,
         .emu_regs = xen_pt_emu_reg_pcie,
     },
+#ifndef CONFIG_STUBDOM
     /* MSI-X Capability Structure reg group */
     {
         .grp_id      = PCI_CAP_ID_MSIX,
@@ -1802,6 +1807,7 @@ static const XenPTRegGroupInfo xen_pt_emu_reg_grps[] = {
         .size_init   = xen_pt_msix_size_init,
         .emu_regs = xen_pt_emu_reg_msix,
     },
+#endif
     /* Intel IGD Opregion group */
     {
         .grp_id      = XEN_PCI_INTEL_OPREGION,
