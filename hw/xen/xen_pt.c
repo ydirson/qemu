@@ -491,9 +491,11 @@ static int xen_pt_register_regions(XenPCIPassthroughState *s, uint16_t *cmd)
      */
     if (d->rom.base_addr && d->rom.size && !(is_igd_vga_passthrough(d))) {
         uint32_t bar_data = 0;
+        int ret;
 
         /* Re-set BAR reported by OS, otherwise ROM can't be read. */
-        if (xen_host_pci_get_long(d, PCI_ROM_ADDRESS, &bar_data)) {
+        if ((ret = xen_host_pci_get_long(d, PCI_ROM_ADDRESS, &bar_data))) {
+            XEN_PT_LOG(&s->dev, "Cannot read PCI_ROM_ADDRESS (%s)\n", strerror(-ret));
             return 0;
         }
         if ((bar_data & PCI_ROM_ADDRESS_MASK) == 0) {
@@ -511,6 +513,9 @@ static int xen_pt_register_regions(XenPCIPassthroughState *s, uint16_t *cmd)
         XEN_PT_LOG(&s->dev, "Expansion ROM registered (size=0x%08"PRIx64
                    " base_addr=0x%08"PRIx64")\n",
                    d->rom.size, d->rom.base_addr);
+    } else {
+        XEN_PT_LOG(&s->dev, "No expansion ROM to register (addr=0x%x, size=%ld, passthru=%d)\n",
+                   d->rom.base_addr, d->rom.size, is_igd_vga_passthrough(d));
     }
 
     xen_pt_register_vga_regions(d);
@@ -794,6 +799,9 @@ static void xen_pt_realize(PCIDevice *d, Error **errp)
         error_propagate(errp, err);
         return;
     }
+    XEN_PT_LOG(d, " real_device = %04x:%02x:%02x.%d\n",
+               s->real_device.domain, s->real_device.bus,
+               s->real_device.dev, s->real_device.func);
 
     s->is_virtfn = s->real_device.is_virtfn;
     if (s->is_virtfn) {
@@ -811,6 +819,8 @@ static void xen_pt_realize(PCIDevice *d, Error **errp)
     /* Setup VGA bios for passthrough GFX */
     if ((s->real_device.domain == 0) && (s->real_device.bus == 0) &&
         (s->real_device.dev == 2) && (s->real_device.func == 0)) {
+        XEN_PT_LOG(d, "Assigning VGA (passthru=%d)...\n",
+                   is_igd_vga_passthrough(&s->real_device));
         if (!is_igd_vga_passthrough(&s->real_device)) {
             error_setg(errp, "Need to enable igd-passthru if you're trying"
                     " to passthrough IGD GFX");

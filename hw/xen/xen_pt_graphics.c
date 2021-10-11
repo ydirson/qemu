@@ -214,6 +214,7 @@ void xen_pt_setup_vga(XenPCIPassthroughState *s, XenHostPCIDevice *dev,
     struct pci_data *pd = NULL;
 
     if (!is_igd_vga_passthrough(dev)) {
+        XEN_PT_LOG(&s->dev, "VGA: igd-passthrough not enabled\n");
         error_setg(errp, "Need to enable igd-passthrough");
         return;
     }
@@ -227,6 +228,7 @@ void xen_pt_setup_vga(XenPCIPassthroughState *s, XenHostPCIDevice *dev,
     }
 
     if (bios_size < sizeof(struct rom_header)) {
+        XEN_PT_LOG(&s->dev, "VGA: VBIOS image corrupt (too small)\n");
         error_setg(errp, "VGA: VBIOS image corrupt (too small)");
         return;
     }
@@ -235,6 +237,7 @@ void xen_pt_setup_vga(XenPCIPassthroughState *s, XenHostPCIDevice *dev,
     rom = (struct rom_header *)bios;
 
     if (rom->pcioffset + sizeof(struct pci_data) > bios_size) {
+        XEN_PT_LOG(&s->dev, "VGA: VBIOS image corrupt (bad pcioffset field)\n");
         error_setg(errp, "VGA: VBIOS image corrupt (bad pcioffset field)");
         return;
     }
@@ -247,6 +250,7 @@ void xen_pt_setup_vga(XenPCIPassthroughState *s, XenHostPCIDevice *dev,
 
         len = rom->size * 512;
         if (len > bios_size) {
+            XEN_PT_LOG(&s->dev, "VGA: VBIOS image corrupt (bad size field)\n");
             error_setg(errp, "VGA: VBIOS image corrupt (bad size field)");
             return;
         }
