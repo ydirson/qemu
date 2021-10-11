@@ -7,6 +7,8 @@
 #include "xen-host-pci-device.h"
 #include "hw/xen/xen-legacy-backend.h"
 
+#include "amd_renoir_vbios.h"
+
 static unsigned long igd_guest_opregion;
 static unsigned long igd_host_opregion;
 
@@ -230,6 +232,40 @@ void xen_pt_setup_vga(XenPCIPassthroughState *s, XenHostPCIDevice *dev,
         return;
     }
 
+    if (1) {
+        void *guest_bios = NULL;
+        /* This is always 32 pages in the real mode reserved region */
+        int bios_size = 32 << XC_PAGE_SHIFT;
+        int vbios_addr = 0xc0000;
+
+        bios = &VBIOS_RENOIR;
+        if (bios[0] != 0x55 || bios[1] != 0xaa) {
+            XEN_PT_ERR(&s->dev, "vbios file has bad magic %02x %02x",
+                       bios[0], bios[1]);
+            return;
+        }
+
+        memory_region_init_ram(&s->dev.rom, OBJECT(&s->dev),
+                               "legacy_vbios.rom", bios_size, &error_abort);
+        guest_bios = memory_region_get_ram_ptr(&s->dev.rom);
+        memset(guest_bios, 0, bios_size);
+        memcpy(guest_bios, bios, sizeof(VBIOS_RENOIR));
+        {
+            unsigned char* romdata = guest_bios;
+            if (romdata[0] != 0x55 || romdata[1] != 0xaa) {
+                XEN_PT_ERR(&s->dev, "copied vbios data has bad magic %02x %02x",
+                           romdata[0], romdata[1]);
+                return;
+            }
+        }
+
+        cpu_physical_memory_rw(vbios_addr, guest_bios, bios_size, 1);
+        memory_region_set_address(&s->dev.rom, vbios_addr);
+        pci_register_bar(&s->dev, PCI_ROM_SLOT, PCI_BASE_ADDRESS_SPACE_MEMORY, &s->dev.rom);
+        s->dev.has_rom = true;
+        XEN_PT_LOG(&s->dev, "Legacy VBIOS imported\n");
+        return;
+    }
     bios = get_sysfs_vgabios(s, &bios_size, dev);
     if (!bios) {
         XEN_PT_LOG(&s->dev, "Unable to get host VBIOS from sysfs - "
