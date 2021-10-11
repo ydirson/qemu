@@ -817,8 +817,11 @@ static void xen_pt_realize(PCIDevice *d, Error **errp)
     s->io_listener = xen_pt_io_listener;
 
     /* Setup VGA bios for passthrough GFX */
-    if ((s->real_device.domain == 0) && (s->real_device.bus == 0) &&
-        (s->real_device.dev == 2) && (s->real_device.func == 0)) {
+    if (((s->real_device.domain == 0) && (s->real_device.bus == 0) &&
+         (s->real_device.dev == 2) && (s->real_device.func == 0)) ||
+        ((s->real_device.domain == 0) && (s->real_device.bus == 7) &&
+         (s->real_device.dev == 0) && (s->real_device.func == 0))
+        ) {
         XEN_PT_LOG(d, "Assigning VGA (passthru=%d)...\n",
                    is_igd_vga_passthrough(&s->real_device));
         if (!is_igd_vga_passthrough(&s->real_device)) {
