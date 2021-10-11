@@ -1754,7 +1754,6 @@ static void e1000_class_init(ObjectClass *klass, void *data)
 
     k->realize = pci_e1000_realize;
     k->exit = pci_e1000_uninit;
-    k->romfile = "efi-e1000.rom";
     k->vendor_id = PCI_VENDOR_ID_INTEL;
     k->device_id = info->device_id;
     k->revision = info->revision;
