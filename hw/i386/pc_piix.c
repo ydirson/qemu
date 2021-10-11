@@ -406,6 +406,7 @@ static void pc_xen_hvm_init(MachineState *machine)
 
     pc_xen_hvm_init_pci(machine);
     pci_create_simple(pcms->bus, -1, "xen-platform");
+    machine->suppress_vmdesc = true;
 }
 #endif
 
