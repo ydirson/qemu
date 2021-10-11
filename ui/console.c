@@ -24,6 +24,7 @@
 
 #include "qemu/osdep.h"
 #include "ui/console.h"
+#include "gui-agent/include/qubes-gui-qemu.h"
 #include "hw/qdev-core.h"
 #include "qapi/error.h"
 #include "qapi/qapi-commands-ui.h"
@@ -1348,9 +1349,11 @@ static void qemu_alloc_display(DisplaySurface *surface, int width, int height)
     surface->image = NULL;
 
     surface->format = PIXMAN_x8r8g8b8;
+    uint8_t *data = qubesgui_alloc_surface_data(width, height, &surface->xen_refs);
+    assert(data != NULL);
     surface->image = pixman_image_create_bits(surface->format,
                                               width, height,
-                                              NULL, width * 4);
+                                              (uint32_t *)data, width * 4);
     assert(surface->image != NULL);
 
     surface->flags = QEMU_ALLOCATED_FLAG;

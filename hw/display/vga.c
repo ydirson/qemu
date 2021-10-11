@@ -1552,6 +1552,8 @@ static void vga_draw_graphic(VGACommonState *s, int full_update)
     } else {
         share_surface = false;
     }
+    /* XXX: Qubes GUI can't use a shared buffer */
+    share_surface = false;
 
     if (s->line_offset != s->last_line_offset ||
         disp_width != s->last_width ||

@@ -130,6 +130,7 @@ typedef struct DisplaySurface {
     GLenum gltype;
     GLuint texture;
 #endif
+    uint32_t *xen_refs;
 } DisplaySurface;
 
 typedef struct QemuUIInfo {
@@ -353,6 +354,11 @@ static inline int surface_bytes_per_pixel(DisplaySurface *s)
 static inline pixman_format_code_t surface_format(DisplaySurface *s)
 {
     return s->format;
+}
+
+static inline uint32_t *surface_xen_refs(DisplaySurface *s)
+{
+    return s->xen_refs;
 }
 
 typedef uint32_t console_ch_t;

@@ -1095,6 +1095,21 @@
   'data'    : { '*charset'       : 'str' } }
 
 ##
+# @DisplayQubesGUI:
+#
+# QubesGUI display options.
+#
+# @log-level: Log level
+# @domid: Domain ID of backend (gui-daemon)
+#
+# Since: 3.0
+#
+##
+{ 'struct'  : 'DisplayQubesGUI',
+  'data'    : { '*log-level': 'int',
+                'domid'     : 'int' } }
+
+##
 # @DisplayType:
 #
 # Display (user interface) type.
@@ -1134,7 +1149,7 @@
 { 'enum'    : 'DisplayType',
   'data'    : [ 'default', 'none', 'gtk', 'sdl',
                 'egl-headless', 'curses', 'cocoa',
-                'spice-app'] }
+                'spice-app', 'qubes-gui' ] }
 
 ##
 # @DisplayOptions:
@@ -1157,7 +1172,8 @@
   'discriminator' : 'type',
   'data'    : { 'gtk'            : 'DisplayGTK',
                 'curses'         : 'DisplayCurses',
-                'egl-headless'   : 'DisplayEGLHeadless'} }
+                'egl-headless'   : 'DisplayEGLHeadless',
+                'qubes-gui'      : 'DisplayQubesGUI' } }
 
 ##
 # @query-display-options:
