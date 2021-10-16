@@ -69,6 +69,17 @@ void *pci_assign_dev_load_option_rom(PCIDevice *dev,
         goto close_rom;
     }
 
+    {
+        unsigned char* romdata = ptr;
+        if (romdata[0] != 0x55 || romdata[1] != 0xaa) {
+            warn_report("pci-assign: rom file %s has bad magic %02x %02x", rom_file,
+                        romdata[0], romdata[1]);
+            memory_region_unref(&dev->rom);
+            ptr = NULL;
+            goto close_rom;
+        }
+    }
+
     pci_register_bar(dev, PCI_ROM_SLOT, PCI_BASE_ADDRESS_SPACE_MEMORY, &dev->rom);
     dev->has_rom = true;
     *size = st.st_size;

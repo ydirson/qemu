@@ -160,6 +160,17 @@ static void xen_pt_direct_vbios_copy(XenPCIPassthroughState *s, Error **errp)
         return;
     }
 
+    {
+        unsigned char* romdata = host_vbios;
+        if (romdata[0] != 0x55 || romdata[1] != 0xaa) {
+            XEN_PT_ERR(&s->dev, "host vbios in /dev/mem has bad magic %02x %02x",
+                       romdata[0], romdata[1]);
+            error_setg(errp, "host vbios in /dev/mem has bad magic %02x %02x",
+                       romdata[0], romdata[1]);
+            return;
+        }
+    }
+
     memory_region_init_ram(&s->dev.rom, OBJECT(&s->dev),
             "legacy_vbios.rom", bios_size, &error_abort);
     guest_bios = memory_region_get_ram_ptr(&s->dev.rom);
