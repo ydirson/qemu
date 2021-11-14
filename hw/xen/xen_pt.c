@@ -489,7 +489,7 @@ static int xen_pt_register_regions(XenPCIPassthroughState *s, uint16_t *cmd)
      * shadow copy for legacy vga devices then don't bother to map it
      * as previous code creates a proper shadow copy
      */
-    if (d->rom.base_addr && d->rom.size && !(is_igd_vga_passthrough(d))) {
+    if (d->rom.base_addr && d->rom.size) {
         uint32_t bar_data = 0;
         int ret;
 
