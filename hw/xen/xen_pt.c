@@ -701,9 +701,9 @@ static const MemoryListener xen_pt_io_listener = {
 };
 
 static void
-xen_igd_passthrough_isa_bridge_create(XenPCIPassthroughState *s,
-                                      XenHostPCIDevice *dev)
+xen_igd_passthrough_isa_bridge_create(XenPCIPassthroughState *s)
 {
+    XenHostPCIDevice *dev = &s->real_device;
     uint16_t gpu_dev_id;
     PCIDevice *d = &s->dev;
 
@@ -831,7 +831,7 @@ static void xen_pt_realize(PCIDevice *d, Error **errp)
             return;
         }
 
-        xen_pt_setup_vga(s, &s->real_device, &err);
+        xen_pt_setup_vga(s, &err);
         if (err) {
             error_append_hint(&err, "Setup VGA BIOS of passthrough"
                     " GFX failed");
@@ -841,7 +841,7 @@ static void xen_pt_realize(PCIDevice *d, Error **errp)
         }
 
         /* Register ISA bridge for passthrough GFX. */
-        xen_igd_passthrough_isa_bridge_create(s, &s->real_device);
+        xen_igd_passthrough_isa_bridge_create(s);
     }
 
     /* Handle real device's MMIO/PIO BARs */

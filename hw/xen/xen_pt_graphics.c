@@ -131,9 +131,9 @@ int xen_pt_unregister_vga_regions(XenHostPCIDevice *dev)
     return 0;
 }
 
-static void *get_sysfs_vgabios(XenPCIPassthroughState *s, int *size,
-                       XenHostPCIDevice *dev)
+static void *get_sysfs_vgabios(XenPCIPassthroughState *s, int *size)
 {
+    XenHostPCIDevice *dev = &s->real_device;
     return pci_assign_dev_load_option_rom(&s->dev, size,
                                           dev->domain, dev->bus,
                                           dev->dev, dev->func);
@@ -215,8 +215,7 @@ struct pci_data {
     uint16_t reserved;
 } __attribute__((packed));
 
-void xen_pt_setup_vga(XenPCIPassthroughState *s, XenHostPCIDevice *dev,
-                     Error **errp)
+void xen_pt_setup_vga(XenPCIPassthroughState *s, Error **errp)
 {
     unsigned char *bios = NULL;
     struct rom_header *rom;
@@ -226,7 +225,7 @@ void xen_pt_setup_vga(XenPCIPassthroughState *s, XenHostPCIDevice *dev,
     uint32_t len = 0;
     struct pci_data *pd = NULL;
 
-    if (!is_igd_vga_passthrough(dev)) {
+    if (!is_igd_vga_passthrough(&s->real_device)) {
         XEN_PT_LOG(&s->dev, "VGA: igd-passthrough not enabled\n");
         error_setg(errp, "Need to enable igd-passthrough");
         return;
@@ -266,7 +265,7 @@ void xen_pt_setup_vga(XenPCIPassthroughState *s, XenHostPCIDevice *dev,
         XEN_PT_LOG(&s->dev, "Legacy VBIOS imported\n");
         return;
     }
-    bios = get_sysfs_vgabios(s, &bios_size, dev);
+    bios = get_sysfs_vgabios(s, &bios_size);
     if (!bios) {
         XEN_PT_LOG(&s->dev, "Unable to get host VBIOS from sysfs - "
                             "falling back to a direct copy of memory ranges\n");
