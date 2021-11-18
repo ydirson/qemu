@@ -421,7 +421,9 @@ static int xen_pt_bar_reg_init(XenPCIPassthroughState *s, XenPTRegInfo *reg,
     s->bases[index].bar_flag = xen_pt_bar_reg_parse(s, index);
     if (s->bases[index].bar_flag == XEN_PT_BAR_FLAG_UNUSED) {
         reg_field = XEN_PT_INVALID_REG;
-    }
+        XEN_PT_LOG(&s->dev, "init BAR %d (unused)\n", index);
+    } else
+        XEN_PT_LOG(&s->dev, "init BAR %d\n", index);
 
     *data = reg_field;
     return 0;
@@ -2016,6 +2018,8 @@ void xen_pt_config_init(XenPCIPassthroughState *s, Error **errp)
 {
     int i, rc;
     Error *err = NULL;
+
+    XEN_PT_LOG(&s->dev, "init\n");
 
     QLIST_INIT(&s->reg_grps);
 
